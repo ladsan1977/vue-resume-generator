@@ -232,5 +232,8 @@ const resetForm = () => {
   jobDescription.value = ''
   selectedFile.value = null
   showResults.value = false
+
+  const fileInput = document.getElementById('profileUpload') as HTMLInputElement
+  if (fileInput) fileInput.value = ''
 }
 </script>
