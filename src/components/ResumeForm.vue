@@ -67,7 +67,7 @@
       </button>
 
       <ResultInformation
-        :generatedContent="generatedContent"
+        :generatedContent="generatedContent || emptyContent"
         :showResults="showResults"
       />
 
@@ -88,6 +88,7 @@
 import { ref } from 'vue'
 import ResultInformation from '@/components/ResultInformation.vue'
 import type { GeneratedContent } from '@/interfaces/generate-content.interface.ts'
+import config from '@/config/config'
 
 const jobDescription = ref<string>('')
 const selectedFile = ref<File | null>(null)
@@ -95,6 +96,23 @@ const showResults = ref(false)
 const isLoading = ref(false)
 
 const generatedContent = ref<GeneratedContent | null>(null)
+
+const emptyContent: GeneratedContent = {
+  summary: { briefSummary: '' },
+  resume: {
+    personalInfo: '',
+    professionalSummary: '',
+    workExperience: '',
+    education: '',
+    skills: '',
+    certifications: '',
+  },
+  coverLetter: {
+    header: '',
+    content: '',
+    salutationAndSignature: '',
+  },
+}
 
 const handleFileChange = (event: Event) => {
   const target = event.target as HTMLInputElement
@@ -129,6 +147,7 @@ const handleSubmit = async () => {
     formData.append('jobDescription', jobDescription.value)
     formData.append('profileFile', 'probando')
 
+    if (!selectedFile.value) return
     const base64 = await fileToBase64(selectedFile.value)
 
     const payload = {
@@ -136,7 +155,9 @@ const handleSubmit = async () => {
       profile_pdf: base64,
     }
 
-    const response = await fetch('/generate_resume', {
+    const url = `${config.apiUrl}/generate_resume`
+
+    const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -149,7 +170,6 @@ const handleSubmit = async () => {
     }
 
     const data = await response.json()
-    console.log('respuesta API', data)
     generatedContent.value = data
 
     // esto para pruebas
